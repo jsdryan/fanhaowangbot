@@ -39,7 +39,7 @@ class FanhaoController < ApplicationController
   def keyword_reply(received_text)
     # 學習紀錄表
     keyword_mapping = {
-      'QQ' => 'http://res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg',
+      'QQ' => 'imageFile=@/res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg',
       '我難過' => '神曲支援：https://www.youtube.com/watch?v=T0LfHEwEXXw&feature=youtu.be&t=1m13s'
     }
 
