@@ -24,7 +24,8 @@ class FanhaoController < ApplicationController
     # 設定回覆訊息
     message = {
       type: 'image',
-      text: reply_text
+      originalContentUrl: reply_text,
+      previewImageUrl: reply_text
     }
 
     # 傳送訊息
@@ -33,14 +34,14 @@ class FanhaoController < ApplicationController
 
   def received_text
     message = params['events'][0]['message']
-    message['text'] unless message.nil?
+    message['image'] unless message.nil?
   end
 
   def keyword_reply(received_text)
     # 學習紀錄表
     keyword_mapping = {
-      'QQ' => 'imageFile=@/res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg',
-      '我難過' => '神曲支援：https://www.youtube.com/watch?v=T0LfHEwEXXw&feature=youtu.be&t=1m13s'
+      'QQ' => 'https://res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg',
+      '我難過' => 'https://res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg'
     }
 
     # 查表
