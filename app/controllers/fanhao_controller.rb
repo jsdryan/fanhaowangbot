@@ -40,8 +40,8 @@ class FanhaoController < ApplicationController
 
   def keyword_reply(received_text)
     url = 'https://www.javbus.com'
-    html_data = open("#{url}/#{received_text}").read
-    cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text.parameterize
+    html_data = open("#{url}/#{received_text.parameterize}").read
+    cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
     cover
   end
 
