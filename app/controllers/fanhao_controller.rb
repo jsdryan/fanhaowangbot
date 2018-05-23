@@ -4,4 +4,8 @@ class FanhaoController < ApplicationController
   def welcome
     render plain: 'test'
   end
+
+  def webhook
+    head :ok
+  end
 end
