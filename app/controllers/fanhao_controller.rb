@@ -1,4 +1,5 @@
 require 'line/bot'
+require 'open-uri'
 
 class FanhaoController < ApplicationController
   protect_from_forgery with: :null_session
@@ -38,14 +39,18 @@ class FanhaoController < ApplicationController
   end
 
   def keyword_reply(received_text)
-    # 學習紀錄表
-    keyword_mapping = {
-      'QQ' => 'https://res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg',
-      '我難過' => '神曲支援：https://www.youtube.com/watch?v=T0LfHEwEXXw&feature=youtu.be&t=1m13s'
-    }
 
-    # 查表
-    keyword_mapping[received_text]
+    url = 'https://www.javbus.com'
+    html_data = open("#{url}/#{received_text}").read
+    cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
+    cover
+    # keyword_mapping = {
+    #   'QQ' => 'https://res.cloudinary.com/demo/image/upload/w_250,h_250,c_fill,f_auto/seagull.jpg',
+    #   '我難過' => '神曲支援：https://www.youtube.com/watch?v=T0LfHEwEXXw&feature=youtu.be&t=1m13s'
+    # }
+
+    # # 查表
+    # keyword_mapping[received_text]
   end
 
   def webhook
