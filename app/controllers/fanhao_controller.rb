@@ -1,4 +1,5 @@
 require 'line/bot'
+require 'open-uri'
 
 class FanhaoController < ApplicationController
   protect_from_forgery with: :null_session
@@ -21,11 +22,15 @@ class FanhaoController < ApplicationController
     # 取得 reply token
     reply_token = params['events'][0]['replyToken']
 
+    url = 'https://www.javbus.com'
+    html_data = open("#{url}/#{reply_token}").read
+    cover = Nokogiri::HTML(html_data).css(".bigImage img")
+
     # 設定回覆訊息
     message = {
       type: 'image',
-      originalContentUrl: reply_text,
-      previewImageUrl: reply_text
+      originalContentUrl: cover,
+      previewImageUrl: cover
     }
 
     # 傳送訊息
@@ -49,7 +54,7 @@ class FanhaoController < ApplicationController
   end
 
   def webhook
-    reply_text = keyword_reply(received_text)
+    reply_text = reply_to_line(received_text)
     response = reply_to_line(reply_text)
 
     head :ok
