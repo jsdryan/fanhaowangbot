@@ -22,7 +22,7 @@ class FanhaoController < ApplicationController
     reply_token = params['events'][0]['replyToken']
 
     # 設定回覆訊息
-    message = {
+    image = {
       type: 'image',
       originalContentUrl: reply_text,
       previewImageUrl: reply_text
