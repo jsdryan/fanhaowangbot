@@ -23,7 +23,7 @@ class FanhaoController < ApplicationController
     reply_token = params['events'][0]['replyToken']
 
     url = 'https://www.javbus.com'
-    html_data = open("#{url}/#{reply_token}").read
+    html_data = open("#{url}/#{reply_text}").read
     cover = Nokogiri::HTML(html_data).css(".bigImage img")
 
     # 設定回覆訊息
