@@ -17,14 +17,22 @@ class FanhaoController < ApplicationController
 
   def value_type(value)
     if value.match(/^\w+.\d+/)
-      url = 'https://www.javbus.com'
-      html_data = open("#{url}/#{value.parameterize}").read
-      cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src')
-      if cover.nil?
-        "https://pics.javbus.com/cover/4u93_b.jpg"
-      else
-        cover.text
-      end
+      # url = 'https://www.javbus.com'
+      # html_data = open("#{url}/#{value.parameterize}").read
+      # cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src')
+      # if cover.nil?
+      #   "https://pics.javbus.com/cover/4u93_b.jpg"
+      # else
+      #   cover.text
+      # end
+      resource = "https://www.libredmm.com/movies"
+      video_body = Nokogiri::HTML(open(resource).read)
+      img_element = video_body.css('.w-100')
+      parsed_cover_url = URI.parse(img_element.attr('src').text)
+      parsed_cover_url.scheme = "https"
+      cover = parsed_cover_url.to_s
+      girl = video_body.css('dd:nth-child(2) a').text
+      cover
     else
       FanhaoAlias.find_by(keyword: value).fanhao
     end
