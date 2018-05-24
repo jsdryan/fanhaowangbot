@@ -85,8 +85,7 @@ class FanhaoController < ApplicationController
               fanhao_alias = FanhaoAlias.find_by(keyword: user_input)
               value = value_type(user_input)
               if fanhao_alias.nil?
-                fanhao = FanhaoAlias.new(keyword: user_input, fanhao: value, is_activated: true)
-                fanhao.create
+                fanhao = FanhaoAlias.create(keyword: user_input, fanhao: value, is_activated: true)
                 @cover = fanhao.fanhao
               else
                 @cover = fanhao_alias.fanhao
