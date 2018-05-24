@@ -24,7 +24,7 @@ class FanhaoController < ApplicationController
 
     # 設定回覆訊息
 
-    message = if reply_text.is_kind_of?(Array)
+    message = if reply_text.kind_of?(Array)
       {
         type: 'text',
         text: 'top 20'
