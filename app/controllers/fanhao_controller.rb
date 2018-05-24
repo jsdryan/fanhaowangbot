@@ -55,7 +55,7 @@ class FanhaoController < ApplicationController
             when ';list'
               commands = ""
               FanhaoAlias.all.each do |fanhao|
-                commands << "\n#{fanhao.keyword} => #{fanhao.fanhao} | "
+                commands << "\n#{fanhao.keyword} => #{fanhao.fanhao}"
               end
 
               {
