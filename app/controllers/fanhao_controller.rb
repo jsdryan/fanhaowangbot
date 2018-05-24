@@ -39,10 +39,15 @@ class FanhaoController < ApplicationController
   end
 
   def keyword_reply(received_text)
-    url = 'https://www.javbus.com'
-    html_data = open("#{url}/#{received_text.parameterize}").read
-    cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
-    cover
+    result = case received_text
+    when 'top 20'
+      puts 'top20'
+    else
+      url = 'https://www.javbus.com'
+      html_data = open("#{url}/#{received_text.parameterize}").read
+      cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
+    end
+    result
   end
 
   def webhook
