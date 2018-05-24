@@ -12,7 +12,7 @@ class FanhaoController < ApplicationController
   end
 
   def welcome
-    render plain: 'test'
+    render plain: 'server is up'
   end
 
   def value_type(value)
