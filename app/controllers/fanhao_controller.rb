@@ -82,19 +82,12 @@ class FanhaoController < ApplicationController
                 }
               }
             else # OBD-065 / 小手
-              fanhao_alias = FanhaoAlias.find_by(keyword: user_input)
-              value = value_type(user_input)
-              if fanhao_alias.nil?
-                fanhao = FanhaoAlias.create(keyword: user_input, fanhao: value, is_activated: true)
-                @cover = fanhao.fanhao
-              else
-                @cover = fanhao_alias.fanhao
-              end
+              cover = value_type(user_input)
 
               {
                 type: 'image',
-                originalContentUrl: @cover,
-                previewImageUrl: @cover
+                originalContentUrl: cover,
+                previewImageUrl: cover
               }
             end
           end
