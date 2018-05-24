@@ -27,7 +27,6 @@ class FanhaoController < ApplicationController
               originalContentUrl: "https://pics.javbus.com/cover/4u93_b.jpg",
               previewImageUrl: "https://pics.javbus.com/cover/4u93_b.jpg"
             }
-          end
           when 'top 10'
             data = []
             top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
