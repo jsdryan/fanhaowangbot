@@ -21,10 +21,10 @@ class FanhaoController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
           message = case user_input
-          when 'top 20'
+          when 'top 10'
             data = []
-            top20 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
-            top20.css('.bd-b').each do |element|
+            top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
+            top10.css('.bd-b').each do |element|
               rank = element.css('.rank').text
               avatar_uri = URI.parse(element.css('img').attr('src').text)
               avatar_uri.scheme = 'https'
@@ -44,12 +44,12 @@ class FanhaoController < ApplicationController
                   }
                 ]
               }
-              data.push(girl)
+              data.push(girl) if data.size != 10
             end
             puts data
             {
               type: 'template',
-              altText: 'DMM top 20 女演員',
+              altText: 'DMM top 10 女演員',
               template: {
                 type: 'carousel',
                 columns: data
