@@ -30,7 +30,7 @@ class FanhaoController < ApplicationController
               avatar_uri.scheme = 'https'
               avatar = avatar_uri.to_s
               name = element.css('.data > p').text
-              works = "https:/" + element.css('.data > p > a').attr('href').text
+              works = "https://www.dmm.co.jp" +  element.css('.data > p > a').attr('href').text
 
               girl = {
                 thumbnailImageUrl: avatar,
