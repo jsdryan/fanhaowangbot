@@ -41,8 +41,8 @@ class FanhaoController < ApplicationController
                     type: 'uri',
                     label: "【#{name}】所有演出",
                     uri: works
-                  },
-                ],
+                  }
+                ]
               }
               data.push(girl)
             end
