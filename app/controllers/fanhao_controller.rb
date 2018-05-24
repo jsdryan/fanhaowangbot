@@ -75,6 +75,7 @@ class FanhaoController < ApplicationController
     reply_text = keyword_reply(received_text)
     response = reply_to_line(reply_text)
 
+    puts response
     head :ok
   end
 end
