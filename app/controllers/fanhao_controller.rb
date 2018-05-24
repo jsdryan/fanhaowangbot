@@ -21,6 +21,13 @@ class FanhaoController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
           message = case user_input
+          when '許效舜'
+            {
+              type: 'image',
+              originalContentUrl: "https://pics.javbus.com/cover/4u93_b.jpg",
+              previewImageUrl: "https://pics.javbus.com/cover/4u93_b.jpg"
+            }
+          end
           when 'top 10'
             data = []
             top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
