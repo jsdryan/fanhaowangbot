@@ -21,7 +21,7 @@ class FanhaoController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
           message = case user_input
-          when '許效舜'
+          when '許效舜', '效舜', '小手的愛'
             {
               type: 'image',
               originalContentUrl: "https://pics.javbus.com/cover/4u93_b.jpg",
@@ -62,7 +62,17 @@ class FanhaoController < ApplicationController
               }
             }
           else
-            url = 'https://www.javbus.com'
+            # url = 'https://www.javbus.com'
+            # html_data = open("#{url}/#{user_input.parameterize}").read
+            # cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
+
+            # {
+            #   type: 'image',
+            #   originalContentUrl: cover,
+            #   previewImageUrl: cover
+            # }
+
+            url = 'https://javbooks.com/serch_censored.htm'
             html_data = open("#{url}/#{user_input.parameterize}").read
             cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
 
