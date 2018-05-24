@@ -11,47 +11,6 @@ class FanhaoController < ApplicationController
     }
   end
 
-  # def reply_to_line(reply_text)
-  #   return nil if reply_text.nil?
-
-  #   # 取得 reply token
-  #   reply_token = params['events'][0]['replyToken']
-
-  #   # 設定回覆訊息
-
-  #   message = if reply_text.kind_of?(Array)
-  #     {
-
-  #     }
-  #   else
-  #     {
-  #       type: 'image',
-  #       originalContentUrl: reply_text,
-  #       previewImageUrl: reply_text
-  #     }
-  #   end
-
-  #   # 傳送訊息
-  #   line.reply_message(reply_token, message)
-  # end
-
-  # def received_text
-  #   message = params['events'][0]['message']
-  #   message['text'] unless message.nil?
-  # end
-
-  # def keyword_reply(received_text)
-  #   result = case received_text
-  #   when 'top 20'
-  #     []
-  #   else
-  #     url = 'https://www.javbus.com'
-  #     html_data = open("#{url}/#{received_text.parameterize}").read
-  #     cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
-  #   end
-  #   result
-  # end
-
   def webhook
     body = request.body.read
     events = line.parse_events_from(body)
@@ -62,38 +21,42 @@ class FanhaoController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
           message = case user_input
-          when 'top 20'
-            {
-              type: 'template',
-              altText: 'this is an template message',
-              template: {
-                type: 'carousel',
-                columns: [
+          when 'top 20' || 'top20'
+
+            data = []
+
+            top20 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
+            top20.css('.bd-b').each do |element|
+              rank = element.css('.rank').text
+              avatar_uri = URI.parse(element.css('img').attr('src').text)
+              avatar_uri.scheme = 'https'
+              avatar = avatar_uri.to_s
+              name = element.css('.data > p').text
+              works = "https:/" + element.css('.data > p > a').attr('href').text
+
+              girl = {
+                thumbnailImageUrl: avatar,
+                title: name,
+                text: rank,
+                works: works,
+                actions: [
                   {
-                    thumbnailImageUrl: 'https://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
-                    title: '佐々波綾',
-                    text: 'Rank #1',
-                    actions: [
-                      {
-                        type: 'uri',
-                        label: '【佐々波綾】所有影片',
-                        uri: 'http://www.dmm.co.jp/digital/videoa/-/list/=/article=actress/id=1037169/'
-                      },
-                    ],
-                  },
-                  {
-                    thumbnailImageUrl: 'https://http://pics.dmm.co.jp/mono/actjpgs/medium/hatano_yui.jpg',
-                    title: '波多野結衣',
-                    text: 'Rank #2',
-                    actions: [
-                      {
-                        type: 'uri',
-                        label: '【波多野結衣】所有影片',
-                        uri: 'http://www.dmm.co.jp/digital/videoa/-/list/=/article=actress/id=26225/'
-                      },
-                    ],
+                    type: 'uri',
+                    label: "【#{name}】所有影片",
+                    uri: works
                   },
                 ],
+              }
+
+              data.push(girl)
+            end
+
+            {
+              type: 'template',
+              altText: 'DMM top 20 女演員',
+              template: {
+                type: 'carousel',
+                columns: data
               }
             }
           else
@@ -116,9 +79,6 @@ class FanhaoController < ApplicationController
       end
     }
 
-
-    # reply_text = keyword_reply(received_text)
-    # response = reply_to_line(reply_text)
     head :ok
   end
 end
