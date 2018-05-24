@@ -33,6 +33,7 @@ class FanhaoController < ApplicationController
       cover = parsed_cover_url.to_s
       girl = video_body.css('dd:nth-child(2) a').text
       cover
+      puts cover
     else
       FanhaoAlias.find_by(keyword: value).fanhao
     end
