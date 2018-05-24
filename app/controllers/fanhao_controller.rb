@@ -23,11 +23,19 @@ class FanhaoController < ApplicationController
     reply_token = params['events'][0]['replyToken']
 
     # 設定回覆訊息
-    message = {
-      type: 'image',
-      originalContentUrl: reply_text,
-      previewImageUrl: reply_text
-    }
+
+    message = if reply_text.is_kind_of?(Array)
+      {
+        type: 'text',
+        text: 'top 20'
+      }
+    else
+      {
+        type: 'image',
+        originalContentUrl: reply_text,
+        previewImageUrl: reply_text
+      }
+    end
 
     # 傳送訊息
     line.reply_message(reply_token, message)
@@ -41,7 +49,7 @@ class FanhaoController < ApplicationController
   def keyword_reply(received_text)
     result = case received_text
     when 'top 20'
-      'top20'
+      []
     else
       url = 'https://www.javbus.com'
       html_data = open("#{url}/#{received_text.parameterize}").read
