@@ -22,41 +22,37 @@ class FanhaoController < ApplicationController
           user_input = event.message['text']
           message = case user_input
           when 'top 20'
-
-            data = []
-
-            top20 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
-            top20.css('.bd-b').each do |element|
-              rank = element.css('.rank').text
-              avatar_uri = URI.parse(element.css('img').attr('src').text)
-              avatar_uri.scheme = 'https'
-              avatar = avatar_uri.to_s
-              name = element.css('.data > p').text
-              works = "https:/" + element.css('.data > p > a').attr('href').text
-
-              girl = {
-                thumbnailImageUrl: avatar,
-                title: name,
-                text: rank,
-                works: works,
-                actions: [
-                  {
-                    type: 'uri',
-                    label: "【#{name}】所有影片",
-                    uri: works
-                  },
-                ],
-              }
-
-              data.push(girl)
-            end
-
             {
               type: 'template',
               altText: 'DMM top 20 女演員',
               template: {
                 type: 'carousel',
-                columns: data
+                columns: [
+                  {
+                    thumbnailImageUrl: 'https://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+                    title: '佐々波綾',
+                    text: 'Rank #1',
+                    actions: [
+                      {
+                        type: 'uri',
+                        label: '【佐々波綾】所有影片',
+                        uri: 'http://www.dmm.co.jp/digital/videoa/-/list/=/article=actress/id=1037169/'
+                      },
+                    ],
+                  },
+                  {
+                    thumbnailImageUrl: 'https://pics.dmm.co.jp/mono/actjpgs/medium/hatano_yui.jpg',
+                    title: '波多野結衣',
+                    text: 'Rank #2',
+                    actions: [
+                      {
+                        type: 'uri',
+                        label: '【波多野結衣】所有影片',
+                        uri: 'http://www.dmm.co.jp/digital/videoa/-/list/=/article=actress/id=26225/'
+                      },
+                    ],
+                  },
+                ],
               }
             }
           else
