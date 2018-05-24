@@ -26,7 +26,7 @@ class FanhaoController < ApplicationController
       #   cover.text
       # end
       resource = "https://www.libredmm.com/movies"
-      video_body = Nokogiri::HTML(open(resource).read)
+      video_body = Nokogiri::HTML(open(resource + value.parameterize).read)
       img_element = video_body.css('.w-100')
       parsed_cover_url = URI.parse(img_element.attr('src').text)
       parsed_cover_url.scheme = "https"
