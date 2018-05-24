@@ -35,12 +35,11 @@ class FanhaoController < ApplicationController
               girl = {
                 thumbnailImageUrl: avatar,
                 title: name,
-                text: rank,
-                works: works,
+                text: "Rank ##{rank}",
                 actions: [
                   {
                     type: 'uri',
-                    label: "【#{name}】所有影片",
+                    label: "【#{name}】所有演出",
                     uri: works
                   },
                 ],
