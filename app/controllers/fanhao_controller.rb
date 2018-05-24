@@ -64,8 +64,47 @@ class FanhaoController < ApplicationController
           message = case user_input
           when 'top 20'
             {
-              type: 'text',
-              text: 'top 20'
+              type: 'template',
+              altText: 'this is an template message',
+              template: {
+                type: 'carousel',
+                columns: [
+                  {
+                    thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+                    title: 'example',
+                    text: 'test',
+                    actions: [
+                      {
+                        type: 'message',
+                        label: 'keep',
+                        text: 'keep'
+                      },
+                      {
+                        type: 'uri',
+                        label: 'site',
+                        uri: 'https://example.com/page1'
+                      },
+                    ],
+                  },
+                  {
+                    thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+                    title: 'example',
+                    text: 'test',
+                    actions: [
+                      {
+                        type: 'message',
+                        label: 'keep',
+                        text: 'keep'
+                      },
+                      {
+                        type: 'uri',
+                        label: 'site',
+                        uri: 'https://example.com/page2'
+                      },
+                    ],
+                  },
+                ],
+              }
             }
           else
             url = 'https://www.javbus.com'
