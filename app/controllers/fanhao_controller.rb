@@ -11,6 +11,10 @@ class FanhaoController < ApplicationController
     }
   end
 
+  def welcome
+    render plain: 'test'
+  end
+
   def value_type(value)
     if value.match(/^\w+.\d+/)
       url = 'https://www.javbus.com'
