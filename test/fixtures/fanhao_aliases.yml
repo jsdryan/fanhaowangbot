@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  keyworad: MyString
+  fanhao: MyString
+  is_activated: false
+
+two:
+  keyworad: MyString
+  fanhao: MyString
+  is_activated: false

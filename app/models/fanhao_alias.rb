@@ -1,0 +1,3 @@
+class FanhaoAlias < ApplicationRecord
+  
+end
