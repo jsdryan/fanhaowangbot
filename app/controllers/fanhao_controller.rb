@@ -70,7 +70,7 @@ class FanhaoController < ApplicationController
                 type: 'carousel',
                 columns: [
                   {
-                    thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+                    thumbnailImageUrl: 'https://pics.javbus.com/thumb/6ls0.jpg',
                     title: 'example',
                     text: 'test',
                     actions: [
@@ -87,7 +87,7 @@ class FanhaoController < ApplicationController
                     ],
                   },
                   {
-                    thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+                    thumbnailImageUrl: 'https://pics.javbus.com/thumb/6ls0.jpg',
                     title: 'example',
                     text: 'test',
                     actions: [
