@@ -26,8 +26,18 @@ class FanhaoController < ApplicationController
 
     message = if reply_text.kind_of?(Array)
       {
-        type: 'text',
-        text: 'top 20'
+        type: 'template',
+        altText: 'example template',
+        template: {
+          type: 'carousel',
+          columns: [
+            {
+              thumbnailImageUrl: 'https://api.reh.tw/line/bot/example/assets/images/example.jpg',
+              title: 'example menu',
+              text: 'desc'
+            }
+          ]
+        }
       }
     else
       {
