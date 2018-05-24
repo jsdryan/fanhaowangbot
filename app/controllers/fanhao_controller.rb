@@ -6,9 +6,8 @@ class FanhaoController < ApplicationController
 
   def line
     @line ||= Line::Bot::Client.new { |config|
-      config.channel_secret = '3896157742f8e82f9f7b3dc3db0a710c'
-      config.channel_token = 'jxl0ZhSptQiS8NneU1kxLKzu2MSX0L/9+mzmPFsxABifrL+BBmJQDj82NfqmIt4hQ6RPiPi4FGomcflpXyKAKoy8JDtmHSkkMkdxK5YKhjrvxQ5PTCs6XOWiMEIzYIRujEYcFVZhXmo4j6R1egl1BwdB04t89/1O/w1cDnyilFU=
-  '
+      config.channel_secret = ENV["LINE_CHANNEL_SECRET"]
+      config.channel_token = ENV["LINE_CHANNEL_TOKEN"]
     }
   end
 
@@ -54,6 +53,7 @@ class FanhaoController < ApplicationController
   # end
 
   def webhook
+    body = request.body.read
     events = line.parse_events_from(body)
     events.each { |event|
       case event
