@@ -29,12 +29,15 @@ class FanhaoController < ApplicationController
         type: 'template',
         altText: 'example template',
         template: {
-          type: 'carousel',
+          type: 'image_carousel',
           columns: [
             {
-              thumbnailImageUrl: 'https://api.reh.tw/line/bot/example/assets/images/example.jpg',
-              title: 'example menu',
-              text: 'desc'
+              imageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+              action: {
+                type: 'message',
+                label: 'Yes',
+                text: 'yes'
+              }
             }
           ]
         }
