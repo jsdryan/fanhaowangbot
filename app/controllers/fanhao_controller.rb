@@ -53,7 +53,7 @@ class FanhaoController < ApplicationController
           else # OBD-065 / 小手 / top 10
             message = case user_input
             when ';help'
-              commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢當前關鍵字 => ;list\n列出當月前十名女優 => top 10"
+              commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n列出當月前十名女優 => top 10"
               {
                 type: 'text',
                 text: commands
