@@ -27,19 +27,45 @@ class FanhaoController < ApplicationController
     message = if reply_text.kind_of?(Array)
       {
         type: 'template',
-        altText: 'example template',
+        altText: 'this is an template message',
         template: {
-          type: 'image_carousel',
+          type: 'carousel',
           columns: [
             {
-              imageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
-              action: {
-                type: 'message',
-                label: 'Yes',
-                text: 'yes'
-              }
-            }
-          ]
+              thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+              title: 'example',
+              text: 'test',
+              actions: [
+                {
+                  type: 'message',
+                  label: 'keep',
+                  text: 'keep'
+                },
+                {
+                  type: 'uri',
+                  label: 'site',
+                  uri: 'https://example.com/page1'
+                },
+              ],
+            },
+            {
+              thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+              title: 'example',
+              text: 'test',
+              actions: [
+                {
+                  type: 'message',
+                  label: 'keep',
+                  text: 'keep'
+                },
+                {
+                  type: 'uri',
+                  label: 'site',
+                  uri: 'https://example.com/page2'
+                },
+              ],
+            },
+          ],
         }
       }
     else
