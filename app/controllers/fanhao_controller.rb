@@ -22,7 +22,7 @@ class FanhaoController < ApplicationController
         cover.text
       end
     else
-      value
+      FanhaoAlias.find_by(keyword: value).fanhao
     end
   end
 
