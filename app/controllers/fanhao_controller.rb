@@ -49,7 +49,7 @@ class FanhaoController < ApplicationController
           elsif user_input.match(/^\-\-.+\-\-/)
             keyword = user_input.split('--')[1]
             fanhao = FanhaoAlias.find_by(keyword: keyword)
-            fanhao.destory
+            fanhao.destroy
           else # OBD-065 / 小手 / top 10
             message = case user_input
             when 'top 10'
