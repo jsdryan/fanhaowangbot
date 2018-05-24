@@ -70,36 +70,26 @@ class FanhaoController < ApplicationController
                 type: 'carousel',
                 columns: [
                   {
-                    thumbnailImageUrl: 'https://pics.javbus.com/thumb/6ls0.jpg',
-                    title: 'example',
-                    text: 'test',
+                    thumbnailImageUrl: 'https://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
+                    title: '佐々波綾',
+                    text: 'Rank #1',
                     actions: [
                       {
-                        type: 'message',
-                        label: 'keep',
-                        text: 'keep'
-                      },
-                      {
                         type: 'uri',
-                        label: 'site',
-                        uri: 'https://example.com/page1'
+                        label: '【佐々波綾】所有影片',
+                        uri: 'http://www.dmm.co.jp/digital/videoa/-/list/=/article=actress/id=1037169/'
                       },
                     ],
                   },
                   {
-                    thumbnailImageUrl: 'https://pics.javbus.com/thumb/6ls0.jpg',
-                    title: 'example',
-                    text: 'test',
+                    thumbnailImageUrl: 'https://http://pics.dmm.co.jp/mono/actjpgs/medium/hatano_yui.jpg',
+                    title: '波多野結衣',
+                    text: 'Rank #2',
                     actions: [
                       {
-                        type: 'message',
-                        label: 'keep',
-                        text: 'keep'
-                      },
-                      {
                         type: 'uri',
-                        label: 'site',
-                        uri: 'https://example.com/page2'
+                        label: '【波多野結衣】所有影片',
+                        uri: 'http://www.dmm.co.jp/digital/videoa/-/list/=/article=actress/id=26225/'
                       },
                     ],
                   },
