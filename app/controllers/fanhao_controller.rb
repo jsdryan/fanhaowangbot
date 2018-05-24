@@ -4,10 +4,6 @@ require 'open-uri'
 class FanhaoController < ApplicationController
   protect_from_forgery with: :null_session
 
-  def welcome
-    render plain: 'test'
-  end
-
   def line
     @line ||= Line::Bot::Client.new { |config|
       config.channel_secret = '3896157742f8e82f9f7b3dc3db0a710c'
@@ -16,92 +12,84 @@ class FanhaoController < ApplicationController
     }
   end
 
-  def reply_to_line(reply_text)
-    return nil if reply_text.nil?
+  # def reply_to_line(reply_text)
+  #   return nil if reply_text.nil?
 
-    # 取得 reply token
-    reply_token = params['events'][0]['replyToken']
+  #   # 取得 reply token
+  #   reply_token = params['events'][0]['replyToken']
 
-    # 設定回覆訊息
+  #   # 設定回覆訊息
 
-    message = if reply_text.kind_of?(Array)
-      {
-        type: 'template',
-        altText: 'this is an template message',
-        template: {
-          type: 'carousel',
-          columns: [
-            {
-              thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
-              title: 'example',
-              text: 'test',
-              actions: [
-                {
-                  type: 'message',
-                  label: 'keep',
-                  text: 'keep'
-                },
-                {
-                  type: 'uri',
-                  label: 'site',
-                  uri: 'https://example.com/page1'
-                },
-              ],
-            },
-            {
-              thumbnailImageUrl: 'http://pics.dmm.co.jp/mono/actjpgs/medium/sazanami_aya.jpg',
-              title: 'example',
-              text: 'test',
-              actions: [
-                {
-                  type: 'message',
-                  label: 'keep',
-                  text: 'keep'
-                },
-                {
-                  type: 'uri',
-                  label: 'site',
-                  uri: 'https://example.com/page2'
-                },
-              ],
-            },
-          ],
-        }
-      }
-    else
-      {
-        type: 'image',
-        originalContentUrl: reply_text,
-        previewImageUrl: reply_text
-      }
-    end
+  #   message = if reply_text.kind_of?(Array)
+  #     {
 
-    # 傳送訊息
-    line.reply_message(reply_token, message)
-  end
+  #     }
+  #   else
+  #     {
+  #       type: 'image',
+  #       originalContentUrl: reply_text,
+  #       previewImageUrl: reply_text
+  #     }
+  #   end
 
-  def received_text
-    message = params['events'][0]['message']
-    message['text'] unless message.nil?
-  end
+  #   # 傳送訊息
+  #   line.reply_message(reply_token, message)
+  # end
 
-  def keyword_reply(received_text)
-    result = case received_text
-    when 'top 20'
-      []
-    else
-      url = 'https://www.javbus.com'
-      html_data = open("#{url}/#{received_text.parameterize}").read
-      cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
-    end
-    result
-  end
+  # def received_text
+  #   message = params['events'][0]['message']
+  #   message['text'] unless message.nil?
+  # end
+
+  # def keyword_reply(received_text)
+  #   result = case received_text
+  #   when 'top 20'
+  #     []
+  #   else
+  #     url = 'https://www.javbus.com'
+  #     html_data = open("#{url}/#{received_text.parameterize}").read
+  #     cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
+  #   end
+  #   result
+  # end
 
   def webhook
-    reply_text = keyword_reply(received_text)
-    response = reply_to_line(reply_text)
+    events = line.parse_events_from(body)
+    events.each { |event|
+      case event
+      when Line::Bot::Event::Message
+        case event.type
+        when Line::Bot::Event::MessageType::Text
+          user_input = event.message['text']
+          message = case user_input
+          when 'top 20'
+            {
+              type: 'text',
+              text: 'top 20'
+            }
+          else
+            url = 'https://www.javbus.com'
+            html_data = open("#{url}/#{received_text.parameterize}").read
+            cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
 
-    puts response
+            {
+              type: 'image',
+              originalContentUrl: cover,
+              previewImageUrl: cover
+            }
+          end
+          line.reply_message(event['replyToken'], message)
+        when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
+          response = line.get_message_content(event.message['id'])
+          tf = Tempfile.open("content")
+          tf.write(response.body)
+        end
+      end
+    }
+
+
+    # reply_text = keyword_reply(received_text)
+    # response = reply_to_line(reply_text)
     head :ok
   end
 end
