@@ -11,6 +11,21 @@ class FanhaoController < ApplicationController
     }
   end
 
+  def value_type(value)
+    if value.match(/^\w+.\d+/)
+      url = 'https://www.javbus.com'
+      html_data = open("#{url}/#{value.parameterize}").read
+      cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src')
+      if cover.nil?
+        "https://pics.javbus.com/cover/4u93_b.jpg"
+      else
+        cover.text
+      end
+    else
+      value
+    end
+  end
+
   def webhook
     body = request.body.read
     events = line.parse_events_from(body)
@@ -20,68 +35,69 @@ class FanhaoController < ApplicationController
         case event.type
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
-          message = case user_input
-          when '許效舜', '效舜', '小手'
-            {
-              type: 'image',
-              originalContentUrl: "https://pics.javbus.com/cover/4u93_b.jpg",
-              previewImageUrl: "https://pics.javbus.com/cover/4u93_b.jpg"
-            }
-          when 'top 10'
-            data = []
-            top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
-            top10.css('.bd-b').each do |element|
-              rank = element.css('.rank').text
-              avatar_uri = URI.parse(element.css('img').attr('src').text)
-              avatar_uri.scheme = 'https'
-              avatar = avatar_uri.to_s
-              name = element.css('.data > p').text
-              works = "https://www.dmm.co.jp" +  element.css('.data > p > a').attr('href').text
 
-              girl = {
-                thumbnailImageUrl: avatar,
-                title: name,
-                text: "Rank ##{rank}",
-                actions: [
-                  {
-                    type: 'uri',
-                    label: "【#{name}】所有演出",
-                    uri: works
-                  }
-                ]
-              }
-              data.push(girl) if data.size != 10
+          if user_input.match(/.+\;.+/) # 小手;OBD-065 / 小手;變態
+            keyword, desired_value = user_input.split(';')
+            fanhao_alias = FanhaoAlias.find_by(keyword: keyword)
+            value = value_type(desired_value)
+
+            if fanhao_alias.nil?
+              FanhaoAlias.create(keyword: keyword, fanhao: value, is_activated: true)
+            else
+              fanhao_alias.update(fanhao: value)
             end
-            puts data
-            {
-              type: 'template',
-              altText: 'DMM top 10 女演員',
-              template: {
-                type: 'carousel',
-                columns: data
+          else # OBD-065 / 小手 / top 10
+            message = case user_input
+            when 'top 10'
+              data = []
+              top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
+              top10.css('.bd-b').each do |element|
+                rank = element.css('.rank').text
+                avatar_uri = URI.parse(element.css('img').attr('src').text)
+                avatar_uri.scheme = 'https'
+                avatar = avatar_uri.to_s
+                name = element.css('.data > p').text
+                works = "https://www.dmm.co.jp" +  element.css('.data > p > a').attr('href').text
+
+                girl = {
+                  thumbnailImageUrl: avatar,
+                  title: name,
+                  text: "Rank ##{rank}",
+                  actions: [
+                    {
+                      type: 'uri',
+                      label: "【#{name}】所有演出",
+                      uri: works
+                    }
+                  ]
+                }
+                data.push(girl) if data.size != 10
+              end
+              {
+                type: 'template',
+                altText: 'DMM top 10 女演員',
+                template: {
+                  type: 'carousel',
+                  columns: data
+                }
               }
-            }
-          else
-            url = 'https://www.javbus.com'
-            html_data = open("#{url}/#{user_input.parameterize}").read
-            cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
+            else # OBD-065 / 小手
+              fanhao_alias = FanhaoAlias.find_by(keyword: user_input)
+              value = value_type(user_input)
+              if fanhao_alias.nil?
+                FanhaoAlias.create(keyword: user_input, fanhao: value, is_activated: true)
+              else
+                @cover = fanhao_alias.fanhao
+              end
 
-            {
-              type: 'image',
-              originalContentUrl: cover,
-              previewImageUrl: cover
-            }
-
-            # url = 'https://javbooks.com/serch_censored.htm'
-            # html_data = open("#{url}/#{user_input.parameterize}").read
-            # cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
-
-            # {
-            #   type: 'image',
-            #   originalContentUrl: cover,
-            #   previewImageUrl: cover
-            # }
+              {
+                type: 'image',
+                originalContentUrl: @cover,
+                previewImageUrl: @cover
+              }
+            end
           end
+
           line.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
           response = line.get_message_content(event.message['id'])
