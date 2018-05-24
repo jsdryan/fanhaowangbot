@@ -28,13 +28,16 @@ class FanhaoController < ApplicationController
       resource = "https://www.libredmm.com/movies/"
       video_body = Nokogiri::HTML(open(resource + value.parameterize).read)
       img_element = video_body.css('.w-100')
-      # parsed_cover_url = URI.parse(img_element.attr('src').text)
-      # parsed_cover_url.scheme = "https"
-      # cover = parsed_cover_url.to_s
-      # girl = video_body.css('dd:nth-child(2) a').text
-      cover = img_element.attr('src').text
-      puts cover
-      cover
+      parsed_cover_url = URI.parse(img_element.attr('src').text)
+      parsed_cover_url.scheme = "https"
+      cover = parsed_cover_url.to_s
+      girl = video_body.css('dd:nth-child(2) a').text
+      puts img_element.attr('src').text
+      if value.match(/^HEYZO/)
+        img_element.attr('src').text
+      else
+        cover
+      end
     else
       FanhaoAlias.find_by(keyword: value).fanhao
     end
