@@ -21,7 +21,7 @@ class FanhaoController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
           message = case user_input
-          when 'top 20' || 'top20'
+          when 'top 20'
 
             data = []
 
