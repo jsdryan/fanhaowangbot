@@ -52,6 +52,16 @@ class FanhaoController < ApplicationController
             fanhao.destroy
           else # OBD-065 / 小手 / top 10
             message = case user_input
+            when ';list'
+              commands = ""
+              FanhaoAlias.all.each do |fanhao|
+                commands << "#{fanhao.keyword} => #{fanhao.fanhao} | "
+              end
+
+              {
+                type: 'text',
+                text: commands
+              }
             when 'top 10'
               data = []
               top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
