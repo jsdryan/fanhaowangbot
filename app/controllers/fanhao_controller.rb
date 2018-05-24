@@ -69,7 +69,7 @@ class FanhaoController < ApplicationController
             }
           else
             url = 'https://www.javbus.com'
-            html_data = open("#{url}/#{received_text.parameterize}").read
+            html_data = open("#{url}/#{user_input.parameterize}").read
             cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src').text
 
             {
