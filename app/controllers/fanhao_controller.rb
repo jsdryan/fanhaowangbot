@@ -41,7 +41,7 @@ class FanhaoController < ApplicationController
   def keyword_reply(received_text)
     result = case received_text
     when 'top 20'
-      puts 'top20'
+      'top20'
     else
       url = 'https://www.javbus.com'
       html_data = open("#{url}/#{received_text.parameterize}").read
