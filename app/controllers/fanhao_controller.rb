@@ -32,8 +32,8 @@ class FanhaoController < ApplicationController
       parsed_cover_url.scheme = "https"
       cover = parsed_cover_url.to_s
       girl = video_body.css('dd:nth-child(2) a').text
-      cover
       puts cover
+      cover
     else
       FanhaoAlias.find_by(keyword: value).fanhao
     end
