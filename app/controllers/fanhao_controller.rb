@@ -15,31 +15,50 @@ class FanhaoController < ApplicationController
     render plain: 'server is up'
   end
 
-  def value_type(value)
-    if value.match(/^\w+.\d+/)
-      # url = 'https://www.javbus.com'
-      # html_data = open("#{url}/#{value.parameterize}").read
-      # cover = Nokogiri::HTML(html_data).css(".bigImage img").attr('src')
-      # if cover.nil?
-      #   "https://pics.javbus.com/cover/4u93_b.jpg"
-      # else
-      #   cover.text
-      # end
-      resource = "https://www.libredmm.com/movies/"
-      video_body = Nokogiri::HTML(open(resource + value.parameterize).read)
-      img_element = video_body.css('.w-100')
-      parsed_cover_url = URI.parse(img_element.attr('src').text)
-      parsed_cover_url.scheme = "https"
-      cover = parsed_cover_url.to_s
-      girl = video_body.css('dd:nth-child(2) a').text
-      puts img_element.attr('src').text
-      if value.match(/^HEYZO/)
-        img_element.attr('src').text
-      else
-        cover
+  def get_vids_info_from(provider, fanhao)
+    begin
+      resp = open("#{provider}/#{fanhao.parameterize}")
+      html_data = resp.read
+      dom = Nokogiri::HTML(html_data)
+
+      case provider
+      when "https://www.javbus.com"
+        cover = dom.css(".bigImage img").attr('src').text
+        girls_node = dom.css("ul+ p a")
+        genres_node = dom.css(".header+ p a")
+      when "https://www.libredmm.com/movies"
+        http_cover_url = dom.css(".w-100").attr('src').text
+        parsed_cover_url = URI.parse(http_cover_url)
+        parsed_cover_url.scheme = "https"
+        cover = parsed_cover_url.to_s
+        girls_node = dom.css("dd:nth-child(2) a")
+        genres_node = dom.css("dd~ dd .list-inline-item a")
       end
+
+      girls = girls_node.to_a.empty? ? "未知演員" : girls_node.to_a.join(", ")
+      genres = genres_node.to_a.empty? ? "未知類別" : genres_node.to_a.join(", ")
+
+      vid = {
+        cover: cover,
+        girls: girls,
+        genres: genres
+      }
+    rescue Exception => e
+      puts "errors occured while searching #{fanhao} at #{provider}"
+      puts e
+    end
+  end
+
+  def get_vid_info(fanhao)
+    puts "get_vid_info 的 fanhao 參數是 #{fanhao}"
+    case fanhao
+    when /^[A-Za-z]+[\s\-]{1}\d+$/ # normal fanhao (including uncensoured)
+      get_vids_info_from("https://www.javbus.com", fanhao)
+    when /^\d+[A-Za-z]+[\s\-]{1}\d+$/ # m-stage
+      get_vids_info_from("https://www.libredmm.com/movies", fanhao)
     else
-      FanhaoAlias.find_by(keyword: value).fanhao
+      puts "找不到 #{fanhao}"
+      nil
     end
   end
 
@@ -53,81 +72,126 @@ class FanhaoController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           user_input = event.message['text']
 
-          if user_input.match(/.+\;.+/) # 小手;OBD-065 / 小手;變態
-            keyword, desired_value = user_input.split(';')
-            fanhao_alias = FanhaoAlias.find_by(keyword: keyword)
-            value = value_type(desired_value)
+          message = case user_input
+                      # searching vids image on external sites
+                    when "top 10"
+                      puts "---------------------- top 10 ----------------------"
+                      begin
+                        data = []
+                        url = "http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress"
+                        resp = open(url)
+                        html_data = resp.read
+                        dom = Nokogiri::HTML(html_data)
+                        top10 = dom.css('.bd-b').each do |element|
+                          rank = element.css('.rank').text
+                          avatar_uri = URI.parse(element.css('img').attr('src').text)
+                          avatar_uri.scheme = 'https'
+                          avatar = avatar_uri.to_s
+                          name = element.css('.data > p').text
+                          works = "https://www.dmm.co.jp" +  element.css('.data > p > a').attr('href').text
 
-            if fanhao_alias.nil?
-              FanhaoAlias.create(keyword: keyword, fanhao: value, is_activated: true)
-            else
-              fanhao_alias.update(fanhao: value)
-            end
-          elsif user_input.match(/^\-\-.+\-\-/)
-            keyword = user_input.split('--')[1]
-            fanhao = FanhaoAlias.find_by(keyword: keyword)
-            fanhao.destroy
-          else # OBD-065 / 小手 / top 10
-            message = case user_input
-            when ';help'
-              commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n列出當月前十名女優 => top 10"
-              {
-                type: 'text',
-                text: commands
-              }
-            when ';list'
-              commands = ""
-              FanhaoAlias.all.each do |fanhao|
-                commands << "\n#{fanhao.keyword} => #{fanhao.fanhao}"
-              end
+                          girl = {
+                            thumbnailImageUrl: avatar,
+                            title: name,
+                            text: "Rank ##{rank}",
+                            actions: [
+                              {
+                                type: 'uri',
+                                label: "【#{name}】所有演出",
+                                uri: works
+                              }
+                            ]
+                          }
+                          data.push(girl) if data.size != 10
+                        end
+                        {
+                          type: 'template',
+                          altText: 'DMM top 10 女演員',
+                          template: {
+                            type: 'carousel',
+                            columns: data
+                          }
+                        }
+                      rescue Exception => e
+                        puts "Error occured while searching top 10 on DMM"
+                        puts e
+                      end
+                    when /^[A-Za-z]+[\s\-]{1}\d+$/, /^\d+[A-Za-z]+[\s\-]{1}\d+$/
+                      puts "---------------------- searching vid image ----------------------"
+                      vid_info = get_vid_info(user_input)
+                      puts vid_info
+                      [
+                        {
+                          type: 'image',
+                          originalContentUrl: vid_info[:cover],
+                          previewImageUrl: vid_info[:cover]
+                        },
+                        { type: "text", text: "女優名：#{vid_info[:girls]}" },
+                        { type: "text", text: "類型：#{vid_info[:genres]}" }
+                      ]
+                    when /.+\S\;\S.+/ # create keyword
+                      puts "---------------------- create keyword ----------------------"
+                      keyword, desired_value = user_input.split(';')
+                      keyword_info = get_vid_info(keyword)
+                      # if keyword cannot be found by searching from sites
+                      # then create or update it
+                      if keyword_info.nil?
+                        mapping = FanhaoAlias.find_or_initialize_by(keyword: keyword)
+                        mapping.fanhao = desired_value
+                        mapping.save
+                        text = "#{mapping.keyword} => #{mapping.fanhao} 建立完成"
+                      else
+                        text = "#{keyword} 不是 #{desired_value}，禁止混淆！"
+                      end
+                      { type: "text", text: text }
+                    when /^\-\-.+\-\-/ # delete keyword
+                      puts "---------------------- delete keyword ----------------------"
+                      keyword = user_input.split('--')[1]
+                      fanhao = FanhaoAlias.find_by(keyword: keyword)
+                      fanhao.destroy
+                      text = "「#{keyword}」已經被刪除"
+                      { type: "text", text: text }
+                    when ";help"
+                      puts "---------------------- help ----------------------"
+                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n列出當月前十名女優 => top 10"
+                      { type: 'text', text: commands }
+                    when ";list"
+                      puts "---------------------- list ----------------------"
+                      commands = ""
+                      FanhaoAlias.all.each do |fanhao|
+                        commands << "\n#{fanhao.keyword} => #{fanhao.fanhao}"
+                      end
+                      { type: 'text', text: commands }
+                    else
+                      puts "---------------------- normal texting ----------------------"
+                      begin
+                        mapping = FanhaoAlias.find_by(keyword: user_input)
 
-              {
-                type: 'text',
-                text: commands
-              }
-            when 'top 10'
-              data = []
-              top10 = Nokogiri::HTML(open("http://www.dmm.co.jp/digital/videoa/-/ranking/=/type=actress/"))
-              top10.css('.bd-b').each do |element|
-                rank = element.css('.rank').text
-                avatar_uri = URI.parse(element.css('img').attr('src').text)
-                avatar_uri.scheme = 'https'
-                avatar = avatar_uri.to_s
-                name = element.css('.data > p').text
-                works = "https://www.dmm.co.jp" +  element.css('.data > p > a').attr('href').text
-
-                girl = {
-                  thumbnailImageUrl: avatar,
-                  title: name,
-                  text: "Rank ##{rank}",
-                  actions: [
-                    {
-                      type: 'uri',
-                      label: "【#{name}】所有演出",
-                      uri: works
-                    }
-                  ]
-                }
-                data.push(girl) if data.size != 10
-              end
-              {
-                type: 'template',
-                altText: 'DMM top 10 女演員',
-                template: {
-                  type: 'carousel',
-                  columns: data
-                }
-              }
-            else # OBD-065 / 小手
-              cover = value_type(user_input)
-
-              {
-                type: 'image',
-                originalContentUrl: cover,
-                previewImageUrl: cover
-              }
-            end
-          end
+                        unless mapping.nil?
+                          puts "#{user_input} 不是 nil"
+                          fanhao_info = get_vid_info(mapping.fanhao)
+                          unless fanhao_info.nil?
+                          puts "#{fanhao_info} 不是 nil"
+                            [
+                              {
+                                type: 'image',
+                                originalContentUrl: fanhao_info[:cover],
+                                previewImageUrl: fanhao_info[:cover]
+                              },
+                              { type: "text", text: "女優名：#{fanhao_info[:girls]}" },
+                              { type: "text", text: "類型：#{fanhao_info[:genres]}" }
+                            ]
+                          else
+                            { type: 'text', text: mapping.fanhao }
+                          end
+                        else
+                          raise "no #{user_input} keyword in database."
+                        end
+                      rescue Exception => e
+                        puts "Error occured while searching #{user_input} in database."
+                        puts e
+                      end
+                    end
 
           line.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
