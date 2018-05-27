@@ -143,7 +143,7 @@ class FanhaoController < ApplicationController
                     when /.*\S\;\S.*/ # create keyword
                       puts "---------------------- create keyword ----------------------"
                       keyword, desired_value = user_input.split(';')
-                      keyword_info = get_vid_info(keyword.gsub(/\s+/, ""))
+                      keyword_info = get_vid_info(keyword)
                       # if keyword cannot be found by searching from sites
                       # then create or update it
                       if keyword_info.nil?
