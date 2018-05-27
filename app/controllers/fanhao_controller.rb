@@ -74,6 +74,17 @@ class FanhaoController < ApplicationController
 
           message = case user_input
                       # searching vids image on external sites
+                    when /^\;help/
+                      puts "---------------------- help ----------------------"
+                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n列出當月前十名女優 => top 10"
+                      { type: 'text', text: commands }
+                    when /^\;list/
+                      puts "---------------------- list ----------------------"
+                      commands = ""
+                      FanhaoAlias.all.each do |fanhao|
+                        commands << "\n#{fanhao.keyword} => #{fanhao.fanhao}"
+                      end
+                      { type: 'text', text: commands }
                     when "top 10"
                       puts "---------------------- top 10 ----------------------"
                       begin
@@ -129,10 +140,10 @@ class FanhaoController < ApplicationController
                         { type: "text", text: "女優名：#{vid_info[:girls]}" },
                         { type: "text", text: "類型：#{vid_info[:genres]}" }
                       ]
-                    when /.+\S\;\S.+/ # create keyword
+                    when /.*\S\;\S.*/ # create keyword
                       puts "---------------------- create keyword ----------------------"
                       keyword, desired_value = user_input.split(';')
-                      keyword_info = get_vid_info(keyword)
+                      keyword_info = get_vid_info(keyword.gsub(/\s+/, ""))
                       # if keyword cannot be found by searching from sites
                       # then create or update it
                       if keyword_info.nil?
@@ -151,17 +162,6 @@ class FanhaoController < ApplicationController
                       fanhao.destroy
                       text = "「#{keyword}」已經被刪除"
                       { type: "text", text: text }
-                    when ";help"
-                      puts "---------------------- help ----------------------"
-                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n列出當月前十名女優 => top 10"
-                      { type: 'text', text: commands }
-                    when ";list"
-                      puts "---------------------- list ----------------------"
-                      commands = ""
-                      FanhaoAlias.all.each do |fanhao|
-                        commands << "\n#{fanhao.keyword} => #{fanhao.fanhao}"
-                      end
-                      { type: 'text', text: commands }
                     else
                       puts "---------------------- normal texting ----------------------"
                       begin
