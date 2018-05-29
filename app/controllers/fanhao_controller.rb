@@ -81,9 +81,9 @@ class FanhaoController < ApplicationController
                       # searching vids image on external sites
                     when /^\;help/
                       puts "---------------------- help ----------------------"
-                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n抽番號 => ;rand\n列出當月前十名女優 => top 10"
+                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n抽番號 => 抽\n列出當月前十名女優 => top 10"
                       { type: 'text', text: commands }
-                    when /^\;rand/
+                    when "抽"
                       puts "---------------------- rand ----------------------"
                       page = rand(1..5059)
                       url = "https://www.javhoo.com/page/#{page}"
@@ -185,6 +185,10 @@ class FanhaoController < ApplicationController
                       keyword_info = get_vid_info(keyword)
                       # if keyword cannot be found by searching from sites
                       # then create or update it
+                      if keyword == "抽"
+                        text = "不要亂搞"
+                      end
+
                       if keyword_info.nil?
                         mapping = FanhaoAlias.find_or_initialize_by(keyword: keyword)
                         mapping.fanhao = desired_value
