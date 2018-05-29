@@ -1,5 +1,6 @@
 require 'line/bot'
 require 'open-uri'
+require 'rest-client'
 
 class FanhaoController < ApplicationController
   protect_from_forgery with: :null_session
@@ -26,6 +27,7 @@ class FanhaoController < ApplicationController
         cover = dom.css(".bigImage img").attr('src').text
         girls_node = dom.css("ul+ p a")
         genres_node = dom.css(".header+ p a")
+        date = dom.css("p:nth-child(2)").text.split(": ")[1]
       when "https://www.libredmm.com/movies"
         http_cover_url = dom.css(".w-100").attr('src').text
         parsed_cover_url = URI.parse(http_cover_url)
@@ -33,6 +35,7 @@ class FanhaoController < ApplicationController
         cover = parsed_cover_url.to_s
         girls_node = dom.css("dd:nth-child(2) a")
         genres_node = dom.css("dd~ dd .list-inline-item a")
+        date = dom.css("dd:nth-child(14)").text
       end
 
       girls = girls_node.to_a.empty? ? "未知演員" : girls_node.to_a.join(", ")
@@ -41,7 +44,8 @@ class FanhaoController < ApplicationController
       vid = {
         cover: cover,
         girls: girls,
-        genres: genres
+        genres: genres,
+        date: date
       }
     rescue Exception => e
       puts "errors occured while searching #{fanhao} at #{provider}"
@@ -76,8 +80,39 @@ class FanhaoController < ApplicationController
                       # searching vids image on external sites
                     when /^\;help/
                       puts "---------------------- help ----------------------"
-                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n列出當月前十名女優 => top 10"
+                      commands = "新增關鍵字 => 關鍵字;番號\n刪除關鍵字 => --關鍵字--\n查詢目前所有關鍵字 => ;list\n抽番號 => ;rand\n列出當月前十名女優 => top 10"
                       { type: 'text', text: commands }
+                    when /^\;rand/
+                      puts "---------------------- rand ----------------------"
+                      page = rand(1..5059)
+                      url = "https://www.javhoo.com/page/#{page}"
+                      begin
+                        puts "get #{url}"
+                        resp = RestClient.get url
+                        dom = Nokogiri::HTML(resp)
+                        fanhaos_dom = dom.css("date")
+                        fanhao_array = []
+                        fanhaos_dom.each do |fanhao_dom|
+                          fanhao = fanhao_dom.text.split(" / ")[0]
+                          fanhao_array.push fanhao
+                        end
+                        rand_fanhao = fanhao_array.sample
+                        vid_info = get_vid_info(rand_fanhao)
+                        puts vid_info
+                        [
+                          {
+                            type: 'image',
+                            originalContentUrl: vid_info[:cover],
+                            previewImageUrl: vid_info[:cover]
+                          },
+                          { type: "text", text: "女優名：#{vid_info[:girls]}" },
+                          { type: "text", text: "發行日：#{vid_info[:date]}" },
+                          { type: "text", text: "類型：#{vid_info[:genres]}" }
+                        ]
+                      rescue Exception => e
+                        puts "not found"
+                        puts e
+                      end
                     when /^\;list/
                       puts "---------------------- list ----------------------"
                       commands = ""
@@ -138,6 +173,7 @@ class FanhaoController < ApplicationController
                           previewImageUrl: vid_info[:cover]
                         },
                         { type: "text", text: "女優名：#{vid_info[:girls]}" },
+                        { type: "text", text: "發行日：#{vid_info[:date]}" },
                         { type: "text", text: "類型：#{vid_info[:genres]}" }
                       ]
                     when /.*\S\;\S.*/ # create keyword
