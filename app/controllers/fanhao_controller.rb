@@ -99,7 +99,7 @@ class FanhaoController < ApplicationController
                           fanhao_array.push fanhao
                         end
                         rand_fanhao = fanhao_array.sample
-                        vid_info = get_vid_info(rand_fanhao)
+                        vid_info = get_vids_info_from "https://www.javbus.com", rand_fanhao
                         puts vid_info
                         [
                           {
@@ -185,9 +185,6 @@ class FanhaoController < ApplicationController
                       keyword_info = get_vid_info(keyword)
                       # if keyword cannot be found by searching from sites
                       # then create or update it
-                      if keyword == "抽"
-                        text = "不要亂搞"
-                      end
 
                       if keyword_info.nil?
                         mapping = FanhaoAlias.find_or_initialize_by(keyword: keyword)
@@ -214,7 +211,7 @@ class FanhaoController < ApplicationController
                           puts "#{user_input} 不是 nil"
                           fanhao_info = get_vid_info(mapping.fanhao)
                           unless fanhao_info.nil?
-                          puts "#{fanhao_info} 不是 nil"
+                            puts "#{fanhao_info} 不是 nil"
                             [
                               {
                                 type: 'image',
