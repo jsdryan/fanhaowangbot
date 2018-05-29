@@ -1,6 +1,5 @@
 require 'line/bot'
 require 'open-uri'
-require 'rest-client'
 
 class FanhaoController < ApplicationController
   protect_from_forgery with: :null_session
@@ -28,6 +27,7 @@ class FanhaoController < ApplicationController
         girls_node = dom.css("ul+ p a")
         genres_node = dom.css(".header+ p a")
         date = dom.css("p:nth-child(2)").text.split(": ")[1]
+        fanhao = dom.css("p:nth-child(1) .header+ span").text
       when "https://www.libredmm.com/movies"
         http_cover_url = dom.css(".w-100").attr('src').text
         parsed_cover_url = URI.parse(http_cover_url)
@@ -45,7 +45,8 @@ class FanhaoController < ApplicationController
         cover: cover,
         girls: girls,
         genres: genres,
-        date: date
+        date: date,
+        fanhao: fanhao
       }
     rescue Exception => e
       puts "errors occured while searching #{fanhao} at #{provider}"
@@ -88,8 +89,9 @@ class FanhaoController < ApplicationController
                       url = "https://www.javhoo.com/page/#{page}"
                       begin
                         puts "get #{url}"
-                        resp = RestClient.get url
-                        dom = Nokogiri::HTML(resp)
+                        resp = open url
+                        html_data = resp.read
+                        dom = Nokogiri::HTML(html_data)
                         fanhaos_dom = dom.css("date")
                         fanhao_array = []
                         fanhaos_dom.each do |fanhao_dom|
@@ -105,6 +107,7 @@ class FanhaoController < ApplicationController
                             originalContentUrl: vid_info[:cover],
                             previewImageUrl: vid_info[:cover]
                           },
+                          { type: "text", text: "番號：#{vid_info[:fanhao]}" },
                           { type: "text", text: "女優名：#{vid_info[:girls]}" },
                           { type: "text", text: "發行日：#{vid_info[:date]}" },
                           { type: "text", text: "類型：#{vid_info[:genres]}" }
