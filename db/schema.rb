@@ -10,17 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_24_074027) do
+ActiveRecord::Schema.define(version: 2018_05_29_195521) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "fanhao_aliases", force: :cascade do |t|
-    t.string "keyword"
-    t.string "fanhao"
-    t.boolean "is_activated"
+  create_table "current_settings", force: :cascade do |t|
+    t.bigint "genre_id", default: 1
+    t.string "channel_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["genre_id"], name: "index_current_settings_on_genre_id"
+  end
+
+  create_table "genres", force: :cascade do |t|
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
+  create_table "keyword_replies", force: :cascade do |t|
+    t.string "keyword"
+    t.text "reply"
+    t.string "channel_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "current_settings", "genres"
 end
